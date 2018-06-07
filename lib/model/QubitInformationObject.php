@@ -3353,4 +3353,74 @@ class QubitInformationObject extends BaseInformationObject
       }
     }, sfConfig::get('app_identifier_mask', ''));
   }
+
+  public function getTopLevelParent() {
+
+    if ($this->parent) {
+      $topLevelParent = $this->parent;
+      while ($topLevelParent->parent && $topLevelParent->parent->id != QubitInformationObject::ROOT_ID)
+      {
+        $topLevelParent = $topLevelParent->parent;
+      }
+    } else {
+      $topLevelParent = "9999";
+    }
+    return $topLevelParent->id;
+  }
+
+
+    public function getItemLevel() {
+
+    if ($this->parent) {
+      $topLevelParent = $this->parent;
+      $itemLevel = 1;
+      while ($topLevelParent->parent)
+      {
+        $topLevelParent = $topLevelParent->parent;
+        $itemLevel++;
+      }
+    } else {
+      $itemLevel = 1;
+    }
+    return $itemLevel;
+  }
+
+
+  /**
+   * Get the digital objects (and the "title" field) for this information object (only direct children)
+   *
+   * @return int Array of stdClass object
+   */
+  public function getDescendentDigitalObjects()
+  {
+    $sql = '
+      SELECT id FROM information_object
+      WHERE lft > ? and rgt < ?
+      AND parent_id = '.$this->id;
+
+    $rows = QubitPdo::fetchAll($sql, array($this->lft, $this->rgt));
+
+    // Convert SQL rows into just an array of integers with all the ids...
+    $ids = array_map(
+      function($row)
+      {
+        return (int)$row->id;
+      },
+      $rows
+    );
+
+
+    if (!count($ids))
+    {
+      return 0;
+    }
+
+    $sql = '
+      SELECT digital_object.*, information_object_i18n.title FROM digital_object, information_object_i18n
+      WHERE information_object_id IN (' . implode(',', $ids) . ')
+      AND digital_object.information_object_id = information_object_i18n.id
+    ';
+
+    return QubitPdo::fetchAll($sql);
+  }  
 }
