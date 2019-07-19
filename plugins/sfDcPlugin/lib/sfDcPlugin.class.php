@@ -240,4 +240,16 @@ class sfDcPlugin implements ArrayAccess
       QubitTerm::getById(QubitTerm::CREATION_ID),
       QubitTerm::getById(QubitTerm::PUBLICATION_ID));
   }
+
+  public static function formatString($string) {
+    $string = str_replace('&', '&amp;', $string);
+    $string = str_replace('<', '&lt;', $string);
+    $string = str_replace('>', '&gt;', $string);
+    $string = str_replace('>', '&gt;', $string);
+    $string = str_replace('"', '&quot;', $string);
+    return $string;
+  }
+
+}
+
 }
