@@ -251,5 +251,3 @@ class sfDcPlugin implements ArrayAccess
   }
 
 }
-
-}
